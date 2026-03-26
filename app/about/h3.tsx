@@ -10,7 +10,7 @@ export default function AreasOfFocus() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute('data-index'));
+            const index = parseInt(entry.target.getAttribute('data-index') || '0');
             setTimeout(() => {
               setVisibleCards(prev => {
                 const newState = [...prev];
