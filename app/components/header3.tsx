@@ -1,9 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Lock, Unlock, Shield, Radio, Share2, Car, PowerOff } from "lucide-react";
+import { Lock, Unlock, Shield, Radio, Share2, Car, PowerOff, LucideIcon } from "lucide-react";
 
-const features = [
+interface Feature {
+  id: number;
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  backTitle: string;
+  backDescription: string;
+}
+
+const features: Feature[] = [
   {
     id: 1,
     icon: Lock,
@@ -54,7 +63,7 @@ const features = [
   }
 ];
 
-const FeatureCard = ({ feature, index }) => {
+const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
