@@ -1,1 +1,16 @@
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="black"></rect>
+  
+  <!-- A Shape -->
+  <path d="M100 30 
+       L40 170 
+       L65 170 
+       L80 130 
+       L120 130 
+       L135 170 
+       L160 170 
+       Z" fill="white"></path>
+
+  <!-- Inner cut (futuristic style) -->
+  <polygon points="100,60 85,110 115,110" fill="black"></polygon>
+</svg>
