@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
-export default function ConnectVehicle() {
+function ConnectVehicleContent() {
   const params = useSearchParams();
   const email = params.get("email");
 
@@ -51,5 +51,13 @@ export default function ConnectVehicle() {
         Connect
       </button>
     </div>
+  );
+}
+
+export default function ConnectVehicle() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black text-white p-10">Loading...</div>}>
+      <ConnectVehicleContent />
+    </Suspense>
   );
 }
