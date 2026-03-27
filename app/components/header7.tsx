@@ -33,13 +33,23 @@ export default function WriteRecommendation() {
     setLoadingRecs(true);
     try {
       const res = await fetch(`${BACKEND_URL}/users/recommendation/all`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(`Expected JSON but received: ${contentType}`);
+      }
+
       const data = await res.json();
       const list: Recommendation[] = Array.isArray(data)
         ? data
         : data.recommendations ?? [];
       setRecommendations(list);
-    } catch {
-      console.error("Failed to fetch recommendations");
+    } catch (err) {
+      console.error("Failed to fetch recommendations:", err);
       setRecommendations([]);
     } finally {
       setLoadingRecs(false);
@@ -114,7 +124,7 @@ export default function WriteRecommendation() {
       return;
     }
     try {
-      await fetch(`${BACKEND_URL}/users/recommendation`, {
+      const res = await fetch(`${BACKEND_URL}/users/recommendation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -125,12 +135,18 @@ export default function WriteRecommendation() {
           authorTitle,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
       alert("Recommendation submitted ✅");
       setText("");
       setAuthorTitle("");
       setShowModal(false);
       fetchRecommendations();
-    } catch {
+    } catch (err) {
+      console.error("Failed to submit recommendation:", err);
       alert("Something went wrong. Please try again.");
     }
   };
