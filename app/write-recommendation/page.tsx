@@ -26,20 +26,30 @@ export default function WriteRecommendation() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
 
-  const BACKEND_URL = "http://localhost:4000";
+  const BACKEND_URL = "https://axentra-backend-production-e185.up.railway.app";
 
   // ─── Fetch recommendations from backend ─────────────────────────────────────
   const fetchRecommendations = async () => {
     setLoadingRecs(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/users/recommendation`);
+      const res = await fetch(`${BACKEND_URL}/users/recommendation`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const data = await res.json();
       const list: Recommendation[] = Array.isArray(data)
         ? data
         : data.recommendations ?? [];
       setRecommendations(list);
-    } catch {
-      console.error("Failed to fetch recommendations");
+    } catch (error) {
+      console.error("Failed to fetch recommendations:", error);
       setRecommendations([]);
     } finally {
       setLoadingRecs(false);
@@ -115,7 +125,7 @@ export default function WriteRecommendation() {
       return;
     }
     try {
-      await fetch(`${BACKEND_URL}/users/recommendation`, {
+      const res = await fetch(`${BACKEND_URL}/users/recommendation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -126,12 +136,18 @@ export default function WriteRecommendation() {
           authorTitle,
         }),
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       alert("Recommendation submitted ✅");
       setText("");
       setAuthorTitle("");
       setShowModal(false);
       fetchRecommendations();
-    } catch {
+    } catch (error) {
+      console.error("Submission error:", error);
       alert("Something went wrong. Please try again.");
     }
   };

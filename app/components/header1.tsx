@@ -70,7 +70,7 @@ export default function Home() {
             isHeadlineVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
           }`}>
             <button
-              onClick={() => { window.location.href = 'http://localhost:4000/auth/google'; }}
+              onClick={() => { window.location.href = 'https://axentra-backend-production-e185.up.railway.app/auth/google'; }}
               className="group px-7 py-3.5 sm:px-8 sm:py-4 bg-[#5a5a5a] text-white font-semibold rounded-lg hover:bg-[#4a4a4a] hover:shadow-xl hover:scale-105 transition-all duration-300 w-full sm:w-auto text-[15px] sm:text-[16px]"
             >
               <span className="relative z-10">Get Started</span>

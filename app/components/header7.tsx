@@ -26,7 +26,7 @@ export default function WriteRecommendation() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
 
-  const BACKEND_URL = "http://localhost:4000";
+  const BACKEND_URL = "https://axentra-backend-production-e185.up.railway.app";
 
   // ─── Fetch recommendations ───────────────────────────────────────────────────
   const fetchRecommendations = async () => {

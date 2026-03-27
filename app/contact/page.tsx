@@ -13,7 +13,7 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
 
-  const BACKEND_URL = "http://localhost:4000";
+  const BACKEND_URL = "https://axentra-backend-production-e185.up.railway.app";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

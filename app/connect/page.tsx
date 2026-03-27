@@ -11,7 +11,7 @@ function ConnectVehicleContent() {
   const [name, setName] = useState("");
 
   const handleConnect = async () => {
-    await fetch("http://localhost:4000/vehicle/connect", {
+    await fetch("https://axentra-backend-production-e185.up.railway.app/vehicle/connect", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

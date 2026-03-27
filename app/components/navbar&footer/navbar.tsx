@@ -52,7 +52,7 @@ const navLinks = [
   { label: "Contact",         href: "/contact"             },
 ];
 
-const BACKEND_URL = "http://localhost:4000";
+const BACKEND_URL = "https://axentra-backend-production-e185.up.railway.app";
 
 // ── Component ──────────────────────────────────────────────────────────────
 export default function Navbar() {

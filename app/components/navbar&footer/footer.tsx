@@ -228,14 +228,14 @@ export default function Footer() {
         <div className="py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-white/20">
           <span>
             © {currentYear} All rights reserved.{" "}
-            Developed &amp; Created by{" "}
+            Project, Idea  &amp; Design by{" "}
             <a
-              href="https://januda.com"
+              href="https://kjanuda.netlify.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-red-500/60 hover:text-red-400 transition-colors duration-150 underline underline-offset-2"
+              className="text-white/50 hover:text-white transition-colors duration-150 underline underline-offset-2"
             >
-              Januda
+              Januda J Kodithuwakku
             </a>
           </span>
           <div className="flex items-center gap-5">

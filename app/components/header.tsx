@@ -101,7 +101,7 @@ export default function HeroHeader() {
 
             <div className="fu-4 mt-5 sm:mt-8 flex flex-wrap items-center gap-2 sm:gap-3">
               <a
-                href="http://localhost:4000/auth/google"
+                href="https://axentra-backend-production-e185.up.railway.app/auth/google"
                 className="px-5 py-2.5 sm:px-7 sm:py-3 rounded text-xs sm:text-sm font-semibold tracking-widest uppercase text-black transition-opacity hover:opacity-90"
                 style={{
                   fontFamily: "'Exo 2', sans-serif",
