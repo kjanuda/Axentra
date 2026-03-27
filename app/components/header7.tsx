@@ -124,11 +124,10 @@ export default function WriteRecommendation() {
   };
 
   // ─── Marquee array ───────────────────────────────────────────────────────────
-  // Always exactly 2 copies so translateX(-50%) snaps back seamlessly.
-  // If cards are too few to fill the viewport we rely on CSS min-width instead.
   const getMarqueeItems = () => {
     if (recommendations.length === 0) return [];
-    return [...recommendations, ...recommendations];
+    const repeatCount = recommendations.length < 4 ? Math.ceil(8 / recommendations.length) : 2;
+    return Array.from({ length: repeatCount * 2 }, () => recommendations).flat();
   };
 
   return (
@@ -185,7 +184,7 @@ export default function WriteRecommendation() {
           .marquee-track {
             display: flex;
             width: max-content;
-            animation: marquee var(--marquee-duration, 28s) linear infinite;
+            animation: marquee 28s linear infinite;
           }
           .marquee-track:hover {
             animation-play-state: paused;
@@ -222,7 +221,7 @@ export default function WriteRecommendation() {
               WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
             }}
           >
-            <div className="marquee-track gap-5" style={{ "--marquee-duration": `${Math.max(recommendations.length * 6, 18)}s` } as React.CSSProperties}>
+            <div className="marquee-track gap-5">
               {getMarqueeItems().map((rec, index) => (
                 <div
                   key={index}
