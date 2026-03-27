@@ -28,39 +28,39 @@ export default function WriteRecommendation() {
 
   const BACKEND_URL = "https://axentra-backend-production-e185.up.railway.app";
 
-  // ─── Fetch recommendations from backend ─────────────────────────────────────
+  // ─── Fetch recommendations ───────────────────────────────────────────────────
   const fetchRecommendations = async () => {
     setLoadingRecs(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/users/recommendation`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
+      const res = await fetch(`${BACKEND_URL}/users/recommendation/all`);
+
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
-      
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(`Expected JSON but received: ${contentType}`);
+      }
+
       const data = await res.json();
       const list: Recommendation[] = Array.isArray(data)
         ? data
         : data.recommendations ?? [];
       setRecommendations(list);
-    } catch (error) {
-      console.error("Failed to fetch recommendations:", error);
+    } catch (err) {
+      console.error("Failed to fetch recommendations:", err);
       setRecommendations([]);
     } finally {
       setLoadingRecs(false);
     }
   };
 
-  // ─── On mount: check localStorage + check if returning from OAuth ───────────
+  // ─── On mount: handle OAuth return + localStorage ────────────────────────────
   useEffect(() => {
     fetchRecommendations();
 
-    const params = new URLSearchParams(window.location.search);
+    const params    = new URLSearchParams(window.location.search);
     const email     = params.get("email");
     const name      = params.get("name");
     const photo     = params.get("photo");
@@ -69,7 +69,7 @@ export default function WriteRecommendation() {
 
     if (email) {
       const userData: User = {
-        name:  name  || email.split("@")[0],
+        name:  name || email.split("@")[0],
         email: email,
         photo: photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}&background=random`,
         ...(token ? { token } : {}),
@@ -78,6 +78,7 @@ export default function WriteRecommendation() {
       setUser(userData);
       setAuthorName(userData.name);
       localStorage.setItem("user", JSON.stringify(userData));
+
       window.history.replaceState({}, document.title, window.location.pathname);
 
       if (openModal === "true") {
@@ -99,22 +100,20 @@ export default function WriteRecommendation() {
   }, []);
 
   // ─── Google login ────────────────────────────────────────────────────────────
-  const handleRecommendationLogin = () => {
-    const stateObj = {
-      role: "recommender",
+  const handleLogin = () => {
+    const state = btoa(JSON.stringify({
+      role:     "recommender",
       redirect: "/write-recommendation",
-    };
-
-    const state = encodeURIComponent(btoa(JSON.stringify(stateObj)));
-    window.location.href = `${BACKEND_URL}/auth/google?state=${state}`;
+    }));
+    window.location.href = `${BACKEND_URL}/auth/google?state=${encodeURIComponent(state)}`;
   };
 
-  // ─── Button click ────────────────────────────────────────────────────────────
+  // ─── Open modal or trigger login ─────────────────────────────────────────────
   const handleOpenModal = () => {
     if (user) {
       setShowModal(true);
     } else {
-      handleRecommendationLogin();
+      handleLogin();
     }
   };
 
@@ -136,20 +135,29 @@ export default function WriteRecommendation() {
           authorTitle,
         }),
       });
-      
+
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
-      
+
       alert("Recommendation submitted ✅");
       setText("");
       setAuthorTitle("");
       setShowModal(false);
       fetchRecommendations();
-    } catch (error) {
-      console.error("Submission error:", error);
+    } catch (err) {
+      console.error("Failed to submit recommendation:", err);
       alert("Something went wrong. Please try again.");
     }
+  };
+
+  // ─── Build marquee array: repeat enough times so loop is seamless ─────────────
+  const getMarqueeItems = () => {
+    if (recommendations.length === 0) return [];
+    const repeatCount = recommendations.length < 4
+      ? Math.ceil(8 / recommendations.length)
+      : 2;
+    return Array.from({ length: repeatCount * 2 }, () => recommendations).flat();
   };
 
   return (
@@ -244,9 +252,15 @@ export default function WriteRecommendation() {
             </p>
           </div>
         ) : (
-          <div className="mb-16 overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)" }}>
+          <div
+            className="mb-16 overflow-hidden"
+            style={{
+              maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+            }}
+          >
             <div className="marquee-track gap-5">
-              {[...recommendations, ...recommendations].map((rec, index) => (
+              {getMarqueeItems().map((rec, index) => (
                 <div
                   key={index}
                   className="bg-gray-50 border border-gray-200 p-8 hover:border-gray-900 transition-all duration-300 group flex-shrink-0"
@@ -328,7 +342,7 @@ export default function WriteRecommendation() {
                 <div className="h-px flex-1 bg-gray-200" />
               </div>
 
-              {/* ── User profile strip (shown when logged in) ── */}
+              {/* ── User profile strip ── */}
               {user && (
                 <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 border border-gray-200">
                   <img
@@ -417,7 +431,7 @@ export default function WriteRecommendation() {
                   </div>
                 </>
               ) : (
-                /* ── Google sign-in prompt (not logged in) ── */
+                /* ── Google sign-in prompt ── */
                 <div className="text-center py-8">
                   <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -425,7 +439,7 @@ export default function WriteRecommendation() {
                   <p className="text-gray-600 text-base mb-2">Please sign in to continue</p>
                   <p className="text-gray-400 text-sm mb-6">Sign in with Google to submit your recommendation</p>
                   <button
-                    onClick={handleRecommendationLogin}
+                    onClick={handleLogin}
                     className="group inline-flex items-center gap-3 bg-white border-2 border-gray-900 text-gray-900 px-8 py-4 text-sm
                       uppercase tracking-[0.2em] hover:bg-gray-900 hover:text-white transition-all duration-300 active:scale-95"
                     style={{ fontFamily: "sans-serif" }}
