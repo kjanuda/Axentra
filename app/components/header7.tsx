@@ -26,6 +26,9 @@ export default function WriteRecommendation() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loadingRecs, setLoadingRecs] = useState(true);
 
+  // ── NEW: selected card for full-view modal ───────────────────────────────────
+  const [selectedRec, setSelectedRec] = useState<Recommendation | null>(null);
+
   const BACKEND_URL = "https://axentra-backend-production-e185.up.railway.app";
 
   // ─── Fetch recommendations ───────────────────────────────────────────────────
@@ -33,16 +36,10 @@ export default function WriteRecommendation() {
     setLoadingRecs(true);
     try {
       const res = await fetch(`${BACKEND_URL}/users/recommendation/all`);
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
+      if (!contentType || !contentType.includes("application/json"))
         throw new Error(`Expected JSON but received: ${contentType}`);
-      }
-
       const data = await res.json();
       const list: Recommendation[] = Array.isArray(data)
         ? data
@@ -56,7 +53,7 @@ export default function WriteRecommendation() {
     }
   };
 
-  // ─── On mount: handle OAuth return + localStorage ────────────────────────────
+  // ─── On mount ────────────────────────────────────────────────────────────────
   useEffect(() => {
     fetchRecommendations();
 
@@ -74,16 +71,11 @@ export default function WriteRecommendation() {
         photo: photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}&background=random`,
         ...(token ? { token } : {}),
       };
-
       setUser(userData);
       setAuthorName(userData.name);
       localStorage.setItem("user", JSON.stringify(userData));
-
       window.history.replaceState({}, document.title, window.location.pathname);
-
-      if (openModal === "true") {
-        setShowModal(true);
-      }
+      if (openModal === "true") setShowModal(true);
       return;
     }
 
@@ -101,45 +93,25 @@ export default function WriteRecommendation() {
 
   // ─── Google login ────────────────────────────────────────────────────────────
   const handleLogin = () => {
-    const state = btoa(JSON.stringify({
-      role:     "recommender",
-      redirect: "/write-recommendation",
-    }));
+    const state = btoa(JSON.stringify({ role: "recommender", redirect: "/write-recommendation" }));
     window.location.href = `${BACKEND_URL}/auth/google?state=${encodeURIComponent(state)}`;
   };
 
-  // ─── Open modal or trigger login ─────────────────────────────────────────────
   const handleOpenModal = () => {
-    if (user) {
-      setShowModal(true);
-    } else {
-      handleLogin();
-    }
+    if (user) setShowModal(true);
+    else handleLogin();
   };
 
-  // ─── Submit recommendation ───────────────────────────────────────────────────
+  // ─── Submit ──────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    if (!text.trim() || !authorTitle.trim()) {
-      alert("Please fill in all fields");
-      return;
-    }
+    if (!text.trim() || !authorTitle.trim()) { alert("Please fill in all fields"); return; }
     try {
       const res = await fetch(`${BACKEND_URL}/users/recommendation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail:   user?.email,
-          authorPhoto: user?.photo,
-          text,
-          authorName,
-          authorTitle,
-        }),
+        body: JSON.stringify({ userEmail: user?.email, authorPhoto: user?.photo, text, authorName, authorTitle }),
       });
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       alert("Recommendation submitted ✅");
       setText("");
       setAuthorTitle("");
@@ -151,12 +123,10 @@ export default function WriteRecommendation() {
     }
   };
 
-  // ─── Build marquee array: repeat enough times so loop is seamless ─────────────
+  // ─── Marquee array ───────────────────────────────────────────────────────────
   const getMarqueeItems = () => {
     if (recommendations.length === 0) return [];
-    const repeatCount = recommendations.length < 4
-      ? Math.ceil(8 / recommendations.length)
-      : 2;
+    const repeatCount = recommendations.length < 4 ? Math.ceil(8 / recommendations.length) : 2;
     return Array.from({ length: repeatCount * 2 }, () => recommendations).flat();
   };
 
@@ -178,22 +148,13 @@ export default function WriteRecommendation() {
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="text-center mb-16">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 mb-3">
-            Professional Testimonials
-          </p>
-          <h1
-            className="text-5xl md:text-6xl font-normal text-gray-900 mb-1 leading-[1.05]"
-            style={{ letterSpacing: "-0.02em" }}
-          >
+          <p className="text-[10px] uppercase tracking-[0.4em] text-gray-400 mb-3">Professional Testimonials</p>
+          <h1 className="text-5xl md:text-6xl font-normal text-gray-900 mb-1 leading-[1.05]" style={{ letterSpacing: "-0.02em" }}>
             Recommendations
           </h1>
-          <h1
-            className="text-5xl md:text-6xl font-normal text-gray-900 mb-8 leading-[1.05] italic"
-            style={{ letterSpacing: "-0.02em" }}
-          >
+          <h1 className="text-5xl md:text-6xl font-normal text-gray-900 mb-8 leading-[1.05] italic" style={{ letterSpacing: "-0.02em" }}>
             & Testimonials.
           </h1>
-
           <button
             onClick={handleOpenModal}
             className="group inline-flex items-center gap-3 bg-gray-900 text-white px-8 py-4 text-sm
@@ -214,7 +175,7 @@ export default function WriteRecommendation() {
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
-        {/* ── Recommendations Marquee ─────────────────────────────────────── */}
+        {/* ── Marquee ─────────────────────────────────────────────────────── */}
         <style>{`
           @keyframes marquee {
             0%   { transform: translateX(0); }
@@ -228,28 +189,29 @@ export default function WriteRecommendation() {
           .marquee-track:hover {
             animation-play-state: paused;
           }
+
+          /* ── Full-view modal animation ── */
+          @keyframes rec-modal-in {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to   { opacity: 1; transform: scale(1)    translateY(0);   }
+          }
+          .rec-modal-panel {
+            animation: rec-modal-in 0.25s cubic-bezier(0.16,1,0.3,1) both;
+          }
         `}</style>
 
         {loadingRecs ? (
           <div className="flex items-center justify-center py-20">
             <div className="flex gap-2">
               {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-2 h-2 rounded-full bg-gray-300 animate-pulse"
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                />
+                <div key={i} className="w-2 h-2 rounded-full bg-gray-300 animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
               ))}
             </div>
           </div>
         ) : recommendations.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-sm uppercase tracking-[0.3em]" style={{ fontFamily: "sans-serif" }}>
-              No recommendations yet
-            </p>
-            <p className="text-gray-300 text-xs mt-2" style={{ fontFamily: "sans-serif" }}>
-              Be the first to share your experience
-            </p>
+            <p className="text-gray-400 text-sm uppercase tracking-[0.3em]" style={{ fontFamily: "sans-serif" }}>No recommendations yet</p>
+            <p className="text-gray-300 text-xs mt-2" style={{ fontFamily: "sans-serif" }}>Be the first to share your experience</p>
           </div>
         ) : (
           <div
@@ -263,13 +225,26 @@ export default function WriteRecommendation() {
               {getMarqueeItems().map((rec, index) => (
                 <div
                   key={index}
-                  className="bg-gray-50 border border-gray-200 p-8 hover:border-gray-900 transition-all duration-300 group flex-shrink-0"
+                  onClick={() => setSelectedRec(rec)}
+                  className="bg-gray-50 border border-gray-200 p-8 hover:border-gray-900 hover:bg-white
+                    hover:shadow-lg transition-all duration-300 group flex-shrink-0 cursor-pointer relative"
                   style={{ width: "360px" }}
                 >
+                  {/* "Read more" hint */}
+                  <span
+                    className="absolute top-4 right-4 text-[9px] uppercase tracking-[0.25em] text-gray-300
+                      group-hover:text-gray-500 transition-colors duration-300"
+                    style={{ fontFamily: "sans-serif" }}
+                  >
+                    Read full ↗
+                  </span>
+
                   <svg className="w-8 h-8 text-gray-300 mb-4 group-hover:text-gray-900 transition-colors" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                   </svg>
+
                   <p className="text-gray-700 text-base leading-relaxed mb-6 line-clamp-4">"{rec.text}"</p>
+
                   <div className="pt-4 border-t border-gray-200 flex items-center gap-3">
                     {rec.authorPhoto ? (
                       <img
@@ -310,7 +285,86 @@ export default function WriteRecommendation() {
         </div>
       </div>
 
-      {/* ── Modal ──────────────────────────────────────────────────────────── */}
+      {/* ═══════════════════════════════════════════════════════════════════
+          ── Full Recommendation View Modal (NEW) ──────────────────────────
+      ═══════════════════════════════════════════════════════════════════ */}
+      {selectedRec && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedRec(null)}
+        >
+          <div
+            className="rec-modal-panel bg-white w-full max-w-xl relative"
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setSelectedRec(null)}
+              className="absolute top-5 right-5 w-9 h-9 flex items-center justify-center
+                hover:bg-gray-100 transition-colors z-10"
+              aria-label="Close"
+            >
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="p-10">
+              {/* Label */}
+              <p className="text-[9px] uppercase tracking-[0.4em] text-gray-400 mb-6" style={{ fontFamily: "sans-serif" }}>
+                Full Testimonial
+              </p>
+
+              {/* Big quote mark */}
+              <svg className="w-10 h-10 text-gray-200 mb-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+
+              {/* Full text — no line-clamp */}
+              <p className="text-gray-800 text-lg leading-[1.75] mb-8">
+                "{selectedRec.text}"
+              </p>
+
+              {/* Divider */}
+              <div className="h-px bg-gray-100 mb-6" />
+
+              {/* Author */}
+              <div className="flex items-center gap-4">
+                {selectedRec.authorPhoto ? (
+                  <img
+                    src={selectedRec.authorPhoto}
+                    alt={selectedRec.authorName}
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    className="w-12 h-12 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedRec.authorName)}&background=e5e7eb&color=374151&size=48`;
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center
+                      bg-gray-900 text-white text-base font-semibold"
+                    style={{ fontFamily: "sans-serif" }}
+                  >
+                    {selectedRec.authorName?.charAt(0)?.toUpperCase() ?? "?"}
+                  </div>
+                )}
+                <div>
+                  <p className="text-base font-semibold text-gray-900">{selectedRec.authorName}</p>
+                  <p className="text-sm text-gray-500 mt-0.5">{selectedRec.authorTitle}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          ── Write Recommendation Modal (existing) ─────────────────────────
+      ═══════════════════════════════════════════════════════════════════ */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
@@ -321,7 +375,6 @@ export default function WriteRecommendation() {
             onClick={(e) => e.stopPropagation()}
             style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
           >
-            {/* Close */}
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors z-10"
@@ -342,7 +395,6 @@ export default function WriteRecommendation() {
                 <div className="h-px flex-1 bg-gray-200" />
               </div>
 
-              {/* ── User profile strip ── */}
               {user && (
                 <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 border border-gray-200">
                   <img
@@ -361,11 +413,7 @@ export default function WriteRecommendation() {
                     <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
                   <button
-                    onClick={() => {
-                      localStorage.removeItem("user");
-                      setUser(null);
-                      setAuthorName("");
-                    }}
+                    onClick={() => { localStorage.removeItem("user"); setUser(null); setAuthorName(""); }}
                     className="ml-auto text-[10px] uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 transition-colors"
                     style={{ fontFamily: "sans-serif" }}
                   >
@@ -374,7 +422,6 @@ export default function WriteRecommendation() {
                 </div>
               )}
 
-              {/* ── Form (logged in) ── */}
               {user ? (
                 <>
                   <div className="mb-6">
@@ -431,7 +478,6 @@ export default function WriteRecommendation() {
                   </div>
                 </>
               ) : (
-                /* ── Google sign-in prompt ── */
                 <div className="text-center py-8">
                   <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
