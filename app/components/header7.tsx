@@ -286,58 +286,58 @@ export default function WriteRecommendation() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          ── Full Recommendation View Modal (NEW) ──────────────────────────
+          ── Full Recommendation View Modal (RESPONSIVE) ───────────────────
       ═══════════════════════════════════════════════════════════════════ */}
       {selectedRec && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4"
           onClick={() => setSelectedRec(null)}
         >
           <div
-            className="rec-modal-panel bg-white w-full max-w-xl relative"
+            className="rec-modal-panel bg-white w-full max-w-xl relative max-h-[95vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
             style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
           >
             {/* Close button */}
             <button
               onClick={() => setSelectedRec(null)}
-              className="absolute top-5 right-5 w-9 h-9 flex items-center justify-center
+              className="absolute top-3 right-3 sm:top-5 sm:right-5 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center
                 hover:bg-gray-100 transition-colors z-10"
               aria-label="Close"
             >
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            <div className="p-10">
+            <div className="p-6 sm:p-8 md:p-10">
               {/* Label */}
-              <p className="text-[9px] uppercase tracking-[0.4em] text-gray-400 mb-6" style={{ fontFamily: "sans-serif" }}>
+              <p className="text-[9px] uppercase tracking-[0.4em] text-gray-400 mb-4 sm:mb-6" style={{ fontFamily: "sans-serif" }}>
                 Full Testimonial
               </p>
 
               {/* Big quote mark */}
-              <svg className="w-10 h-10 text-gray-200 mb-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-200 mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
 
               {/* Full text — no line-clamp */}
-              <p className="text-gray-800 text-lg leading-[1.75] mb-8">
+              <p className="text-gray-800 text-base sm:text-lg leading-[1.7] sm:leading-[1.75] mb-6 sm:mb-8">
                 "{selectedRec.text}"
               </p>
 
               {/* Divider */}
-              <div className="h-px bg-gray-100 mb-6" />
+              <div className="h-px bg-gray-100 mb-5 sm:mb-6" />
 
               {/* Author */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
                 {selectedRec.authorPhoto ? (
                   <img
                     src={selectedRec.authorPhoto}
                     alt={selectedRec.authorName}
                     referrerPolicy="no-referrer"
                     crossOrigin="anonymous"
-                    className="w-12 h-12 rounded-full object-cover border border-gray-200 flex-shrink-0"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border border-gray-200 flex-shrink-0"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedRec.authorName)}&background=e5e7eb&color=374151&size=48`;
@@ -345,16 +345,16 @@ export default function WriteRecommendation() {
                   />
                 ) : (
                   <div
-                    className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center
-                      bg-gray-900 text-white text-base font-semibold"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 flex items-center justify-center
+                      bg-gray-900 text-white text-sm sm:text-base font-semibold"
                     style={{ fontFamily: "sans-serif" }}
                   >
                     {selectedRec.authorName?.charAt(0)?.toUpperCase() ?? "?"}
                   </div>
                 )}
                 <div>
-                  <p className="text-base font-semibold text-gray-900">{selectedRec.authorName}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{selectedRec.authorTitle}</p>
+                  <p className="text-sm sm:text-base font-semibold text-gray-900">{selectedRec.authorName}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{selectedRec.authorTitle}</p>
                 </div>
               </div>
             </div>
